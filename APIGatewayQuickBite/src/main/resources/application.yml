@@ -59,6 +59,42 @@ spring:
               predicates:
                 - Path=/api/notificaciones/**
 
+            # SWAGGER AUTH
+            - id: auth-docs
+              uri: http://localhost:8081
+              predicates:
+                - Path=/auth-docs
+
+            # SWAGGER USER
+            - id: user-docs
+              uri: http://localhost:8082
+              predicates:
+                - Path=/user-docs
+
+            # SWAGGER MENU
+            - id: menu-docs
+              uri: http://localhost:8083
+              predicates:
+                - Path=/menu-docs
+
+            # SWAGGER ORDER
+            - id: order-docs
+              uri: http://localhost:8084
+              predicates:
+                - Path=/order-docs
+
+            # SWAGGER PAYMENT
+            - id: payment-docs
+              uri: http://localhost:8085
+              predicates:
+                - Path=/payment-docs
+
+            # SWAGGER NOTIFICATION
+            - id: notification-docs
+              uri: http://localhost:8086
+              predicates:
+                - Path=/notification-docs
+
 management:
   endpoints:
     web:

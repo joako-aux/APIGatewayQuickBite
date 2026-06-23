@@ -20,32 +20,73 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
+
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(auth -> auth
-                        // 1. RUTAS PÚBLICAS: Únicamente la autenticación (Login/Registro)
-                        .requestMatchers("/api/auth/**").permitAll()
 
-                        // 2. RUTAS PROTEGIDAS: Todo el resto del ecosistema de microservicios requiere JWT válido
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
+
+                .authorizeHttpRequests(auth -> auth
+
+                        // AUTH PUBLICO
+                        .requestMatchers(
+                                "/api/auth/**"
+                        ).permitAll()
+
+                        // SWAGGER GATEWAY
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
+                        // SWAGGER MICROSERVICIOS
+                        .requestMatchers(
+                                "/auth-docs/**",
+                                "/user-docs/**",
+                                "/menu-docs/**",
+                                "/order-docs/**",
+                                "/payment-docs/**",
+                                "/notification-docs/**",
+                                "/auth-docs",
+                                "/user-docs",
+                                "/menu-docs",
+                                "/order-docs",
+                                "/payment-docs",
+                                "/notification-docs"
+                        ).permitAll()
+
+                        // MICROSERVICIOS PROTEGIDOS
                         .requestMatchers(
                                 "/api/users/**",
                                 "/api/usuarios/**",
+
                                 "/api/menu/**",
                                 "/api/categorias/**",
                                 "/api/productos/**",
+
                                 "/api/ordenes/**",
+
                                 "/api/pagos/**",
+
                                 "/api/notificaciones/**"
                         ).authenticated()
 
-                        // Cualquier otra ruta residual se bloquea por seguridad
-                        .anyRequest().authenticated()
+                        .anyRequest()
+                        .authenticated()
                 )
-                .addFilterBefore(jwtGatewayFilter, UsernamePasswordAuthenticationFilter.class);
+
+                .addFilterBefore(
+                        jwtGatewayFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

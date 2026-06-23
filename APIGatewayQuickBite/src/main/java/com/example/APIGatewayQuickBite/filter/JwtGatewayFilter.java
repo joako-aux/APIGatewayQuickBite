@@ -25,6 +25,20 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
         this.jwtService = jwtService;
     }
 
+    // OMITIR SWAGGER: Evita que este filtro intercepte las peticiones de documentación
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return path.startsWith("/swagger-ui")
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/auth-docs")
+                || path.startsWith("/user-docs")
+                || path.startsWith("/menu-docs")
+                || path.startsWith("/order-docs")
+                || path.startsWith("/payment-docs")
+                || path.startsWith("/notification-docs");
+    }
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -32,14 +46,11 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String path = request.getRequestURI();
         String authHeader = request.getHeader("Authorization");
 
-        // Variables finales que usará nuestro Wrapper
         final String finalEmail;
         final String finalRole;
 
-        // Evaluamos si viene un token válido
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
@@ -47,7 +58,6 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
                 finalEmail = jwtService.extractEmail(token);
                 finalRole = jwtService.extractRole(token);
 
-                // Configurar el contexto de seguridad local del Gateway
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 finalEmail,
@@ -56,18 +66,14 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
                         );
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                // Si el token viene pero es inválido/expirado, rechazamos con 401
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         } else {
-            // CASO NEGATIVO: Si no viene token y la ruta es protegida, Spring Security se encargará de rebotarla.
-            // Si la ruta es pública (como /profile), permitimos que pase inyectando los valores por defecto.
             finalEmail = "user_mal_ingresado";
             finalRole = "role_mal_ingresado";
         }
 
-        // MUTACIÓN: Envolvemos la petición para inyectar físicamente las cabeceras HTTP (reales o por defecto)
         HttpServletRequest wrappedRequest = new HttpServletRequestWrapper(request) {
             @Override
             public String getHeader(String name) {
@@ -100,7 +106,6 @@ public class JwtGatewayFilter extends OncePerRequestFilter {
             }
         };
 
-        // Pasamos la petición ENVUELTA al resto de la cadena (incluyendo Spring Security)
         filterChain.doFilter(wrappedRequest, response);
     }
 }
