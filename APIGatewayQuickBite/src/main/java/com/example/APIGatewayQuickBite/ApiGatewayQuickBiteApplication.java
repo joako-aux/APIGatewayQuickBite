@@ -9,5 +9,5 @@ public class ApiGatewayQuickBiteApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ApiGatewayQuickBiteApplication.class, args);
 	}
-
+//prueba
 }
