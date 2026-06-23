@@ -17,17 +17,47 @@ spring:
               predicates:
                 - Path=/api/auth/**
 
-            # USER SERVICE
-            - id: user-service
+            # USER SERVICE (Rutas separadas explícitamente para evitar fallos en WebMVC)
+            - id: user-service-en
               uri: http://localhost:8082
               predicates:
                 - Path=/api/users/**
+            - id: user-service-es
+              uri: http://localhost:8082
+              predicates:
+                - Path=/api/usuarios/**
 
-            # MENU SERVICE
-            - id: menu-service
+            # MENU SERVICE (Rutas separadas explícitamente para evitar fallos en WebMVC)
+            - id: menu-service-main
               uri: http://localhost:8083
               predicates:
                 - Path=/api/menu/**
+            - id: menu-service-categories
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/categorias/**
+            - id: menu-service-products
+              uri: http://localhost:8083
+              predicates:
+                - Path=/api/productos/**
+
+            # ORDER SERVICE
+            - id: order-service-quickbite
+              uri: http://localhost:8084
+              predicates:
+                - Path=/api/ordenes/**
+
+            # PAYMENTS SERVICE
+            - id: pagos-service
+              uri: http://localhost:8085
+              predicates:
+                - Path=/api/pagos/**
+
+            # NOTIFICATION SERVICE
+            - id: notification-service
+              uri: http://localhost:8086
+              predicates:
+                - Path=/api/notificaciones/**
 
 management:
   endpoints:
