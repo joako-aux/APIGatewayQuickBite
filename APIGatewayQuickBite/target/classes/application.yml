@@ -13,21 +13,82 @@ spring:
 
             # AUTH SERVICE
             - id: auth-service
-              uri: http://localhost:8081
+              uri: ${AUTH_SERVICE_URL:http://localhost:8081}
               predicates:
                 - Path=/api/auth/**
 
             # USER SERVICE
-            - id: user-service
-              uri: http://localhost:8082
+            - id: user-service-en
+              uri: ${USER_SERVICE_URL:http://localhost:8082}
               predicates:
                 - Path=/api/users/**
+            - id: user-service-es
+              uri: ${USER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/usuarios/**
 
             # MENU SERVICE
-            - id: menu-service
-              uri: http://localhost:8083
+            - id: menu-service-main
+              uri: ${MENU_SERVICE_URL:http://localhost:8083}
               predicates:
                 - Path=/api/menu/**
+            - id: menu-service-categories
+              uri: ${MENU_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/categorias/**
+            - id: menu-service-products
+              uri: ${MENU_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/productos/**
+
+            # ORDER SERVICE
+            - id: order-service-quickbite
+              uri: ${ORDER_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/ordenes/**
+
+            # PAYMENTS SERVICE
+            - id: pagos-service
+              uri: ${PAGOS_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/api/pagos/**
+
+            # NOTIFICATION SERVICE
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/notificaciones/**
+
+            # SWAGGER DOCS (Mapeados dinámicamente también)
+            - id: auth-docs
+              uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/auth-docs
+
+            - id: user-docs
+              uri: ${USER_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/user-docs
+
+            - id: menu-docs
+              uri: ${MENU_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/menu-docs
+
+            - id: order-docs
+              uri: ${ORDER_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/order-docs
+
+            - id: payment-docs
+              uri: ${PAGOS_SERVICE_URL:http://localhost:8085}
+              predicates:
+                - Path=/payment-docs
+
+            - id: notification-docs
+              uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/notification-docs
 
 management:
   endpoints:
