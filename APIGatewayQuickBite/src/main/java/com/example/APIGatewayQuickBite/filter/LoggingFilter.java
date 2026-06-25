@@ -4,22 +4,26 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.UUID;
 
-@Slf4j
 @Component
-public class LoggingFilter extends OncePerRequestFilter implements Ordered {
+public class LoggingFilter extends OncePerRequestFilter {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(LoggingFilter.class);
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // Evitamos ensuciar la consola con peticiones repetitivas de documentación
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
         String path = request.getRequestURI();
+
         return path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
                 || path.equals("/auth-docs")
@@ -31,38 +35,36 @@ public class LoggingFilter extends OncePerRequestFilter implements Ordered {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Generamos un identificador de 8 caracteres único para cada flujo de petición
-        String traceId = UUID.randomUUID().toString().substring(0, 8);
-        long startTime = System.currentTimeMillis();
+        String traceId =
+                UUID.randomUUID().toString().substring(0, 8);
 
-        String method = request.getMethod();
-        String uri = request.getRequestURI();
-        String remoteAddr = request.getRemoteAddr();
+        long start = System.currentTimeMillis();
 
-        // LOG DE ENTRADA
-        log.info("[TRACE-ID: {}] 📥 ENTRADA: [{}] {} | Origen IP: {}", traceId, method, uri, remoteAddr);
+        log.info(
+                "[TRACE-ID: {}] ENTRADA [{}] {}",
+                traceId,
+                request.getMethod(),
+                request.getRequestURI()
+        );
 
-        try {
-            filterChain.doFilter(request, response);
-        } finally {
-            long duration = System.currentTimeMillis() - startTime;
-            int status = response.getStatus();
+        filterChain.doFilter(request, response);
 
-            // LOG DE SALIDA (Diferencia si hay un código de error o éxito)
-            if (status >= 400) {
-                log.warn("[TRACE-ID: {}] ⚠️ SALIDA: [{}] {} | Estado HTTP: {} | Duración: {}ms", traceId, method, uri, status, duration);
-            } else {
-                log.info("[TRACE-ID: {}] 📤 SALIDA: [{}] {} | Estado HTTP: {} | Duración: {}ms", traceId, method, uri, status, duration);
-            }
-        }
-    }
+        long duration =
+                System.currentTimeMillis() - start;
 
-    @Override
-    public int getOrder() {
-        // Máxima prioridad para calcular los tiempos desde el inicio absoluto del ciclo de vida
-        return Ordered.HIGHEST_PRECEDENCE;
+        log.info(
+                "[TRACE-ID: {}] SALIDA [{}] {} -> {} ({} ms)",
+                traceId,
+                request.getMethod(),
+                request.getRequestURI(),
+                response.getStatus(),
+                duration
+        );
     }
 }
